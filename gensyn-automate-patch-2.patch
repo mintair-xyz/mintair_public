@@ -1,5 +1,5 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index 81989e8..cc5394a 100755
+index 81989e8..fe2493e 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
 @@ -1,6 +1,6 @@
@@ -105,18 +105,21 @@ index 81989e8..cc5394a 100755
          if [[ "$STATUS" == "activated" ]]; then
              echo "API key is activated! Proceeding..."
              break
-@@ -99,7 +70,7 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
- 
-     # Function to clean up the server process
-     cleanup() {
+@@ -96,56 +67,38 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
+             sleep 5
+         fi
+     done
+-
+-    # Function to clean up the server process
+-    cleanup() {
 -        echo_green ">> Shutting down server..."
-+        echo "Shutting down server..."
-         kill $SERVER_PID
-         rm -r modal-login/temp-data/*.json
-         exit 0
-@@ -108,44 +79,37 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
-     # Set up trap to catch Ctrl+C and call cleanup
-     trap cleanup INT
+-        kill $SERVER_PID
+-        rm -r modal-login/temp-data/*.json
+-        exit 0
+-    }
+-
+-    # Set up trap to catch Ctrl+C and call cleanup
+-    trap cleanup INT
  fi
 -
 -pip_install() {
@@ -159,7 +162,7 @@ index 81989e8..cc5394a 100755
  
 -if [ -n "${HF_TOKEN}" ]; then # Check if HF_TOKEN is already set and use if so. Else give user a prompt to choose.
 -    HUGGINGFACE_ACCESS_TOKEN=${HF_TOKEN}
-+huggingFaceApiKey=$1
++huggingFaceApiKey=$2
 +if [ -n "$huggingFaceApiKey" ]; then
 +    HUGGINGFACE_ACCESS_TOKEN="$huggingFaceApiKey"
  else
@@ -182,7 +185,7 @@ index 81989e8..cc5394a 100755
  
  if [ -n "$ORG_ID" ]; then
      python -m hivemind_exp.gsm8k.train_single_gpu \
-@@ -158,9 +122,9 @@ else
+@@ -158,9 +111,9 @@ else
          --hf_token "$HUGGINGFACE_ACCESS_TOKEN" \
          --identity_path "$IDENTITY_PATH" \
          --public_maddr "$PUB_MULTI_ADDRS" \
