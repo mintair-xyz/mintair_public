@@ -1,5 +1,5 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index a0a3b91..2f778ea 100755
+index a0a3b91..1662f6f 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
 @@ -29,7 +29,6 @@ HOST_MULTI_ADDRS=${HOST_MULTI_ADDRS:-$DEFAULT_HOST_MULTI_ADDRS}
@@ -112,17 +112,21 @@ index a0a3b91..2f778ea 100755
  
  if ! command -v nvidia-smi &> /dev/null; then
      # You don't have a NVIDIA GPU
-@@ -166,19 +107,11 @@ fi
+@@ -160,26 +101,13 @@ elif [ -n "$CPU_ONLY" ]; then
+     CONFIG_PATH="$ROOT/hivemind_exp/configs/mac/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
+ else
+     # NVIDIA GPU found
+-    pip_install "$ROOT"/requirements_gpu.txt
++    pip install --disable-pip-version-check -q -r  "$ROOT"/requirements_gpu.txt
+     CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
+ fi
  
  echo_green ">> Done!"
  
 -HF_TOKEN=${HF_TOKEN:-""}
 -if [ -n "${HF_TOKEN}" ]; then # Check if HF_TOKEN is already set and use if so. Else give user a prompt to choose.
 -    HUGGINGFACE_ACCESS_TOKEN=${HF_TOKEN}
-+huggingFaceApiKey=$2
-+if [ -n "$huggingFaceApiKey" ]; then
-+    HUGGINGFACE_ACCESS_TOKEN="$huggingFaceApiKey"
- else
+-else
 -    echo -en $GREEN_TEXT
 -    read -p ">> Would you like to push models you train in the RL swarm to the Hugging Face Hub? [y/N] " yn
 -    echo -en $RESET_TEXT
@@ -132,7 +136,8 @@ index a0a3b91..2f778ea 100755
 -        [Nn]*) HUGGINGFACE_ACCESS_TOKEN="None" ;;
 -        *) echo ">>> No answer was given, so NO models will be pushed to Hugging Face Hub" && HUGGINGFACE_ACCESS_TOKEN="None" ;;
 -    esac
-+    HUGGINGFACE_ACCESS_TOKEN="None"
- fi
+-fi
++HUGGINGFACE_ACCESS_TOKEN="None"
  
  echo_green ">> Good luck in the swarm!"
+ echo_blue ">> Post about rl-swarm on X/twitter! --> https://tinyurl.com/swarmtweet"
