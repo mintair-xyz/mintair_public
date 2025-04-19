@@ -1,17 +1,16 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index a0a3b91..b084164 100755
+index a0a3b91..2f778ea 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
-@@ -29,7 +29,7 @@ HOST_MULTI_ADDRS=${HOST_MULTI_ADDRS:-$DEFAULT_HOST_MULTI_ADDRS}
+@@ -29,7 +29,6 @@ HOST_MULTI_ADDRS=${HOST_MULTI_ADDRS:-$DEFAULT_HOST_MULTI_ADDRS}
  # Remove this file if you want a new PeerID.
  DEFAULT_IDENTITY_PATH="$ROOT"/swarm.pem
  IDENTITY_PATH=${IDENTITY_PATH:-$DEFAULT_IDENTITY_PATH}
 -
-+:$1/
  # Will ignore any visible GPUs if set.
  CPU_ONLY=${CPU_ONLY:-""}
  
-@@ -50,32 +50,7 @@ echo_blue() {
+@@ -50,32 +49,7 @@ echo_blue() {
  
  ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
  
@@ -45,7 +44,7 @@ index a0a3b91..b084164 100755
  
  if [ "$CONNECT_TO_TESTNET" = "True" ]; then
      # Run modal_login server.
-@@ -84,41 +59,12 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
+@@ -84,41 +58,12 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
      # Check if the yarn command exists; if not, install Yarn.
      source ~/.bashrc
  
@@ -88,7 +87,7 @@ index a0a3b91..b084164 100755
      cd ..
  
      echo_green ">> Waiting for modal userData.json to be created..."
-@@ -133,7 +79,7 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
+@@ -133,7 +78,7 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
      # Wait until the API key is activated by the client
      echo "Waiting for API key to become activated..."
      while true; do
@@ -97,7 +96,7 @@ index a0a3b91..b084164 100755
          if [[ "$STATUS" == "activated" ]]; then
              echo "API key is activated! Proceeding..."
              break
-@@ -144,13 +90,9 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
+@@ -144,13 +89,9 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
      done
  fi
  
@@ -113,7 +112,7 @@ index a0a3b91..b084164 100755
  
  if ! command -v nvidia-smi &> /dev/null; then
      # You don't have a NVIDIA GPU
-@@ -166,19 +108,11 @@ fi
+@@ -166,19 +107,11 @@ fi
  
  echo_green ">> Done!"
  
