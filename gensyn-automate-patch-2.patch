@@ -1,20 +1,19 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index 4cba368..bf339cf 100755
+index 0695202..af44c42 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
-@@ -54,10 +54,6 @@ ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
+@@ -57,9 +57,6 @@ ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
  cleanup() {
      echo_green ">> Shutting down trainer..."
  
 -    # Remove modal credentials if they exist
 -    rm -r $ROOT_DIR/modal-login/temp-data/*.json 2> /dev/null || true
 -
--    # Kill all processes belonging to this script's process group
+     # Kill all processes belonging to this script's process group
      kill -- -$$ || true
  
-     exit 0
-@@ -77,67 +73,20 @@ cat << "EOF"
-                                                                 
+@@ -80,94 +77,22 @@ cat << "EOF"
+ 
  EOF
  
 -while true; do
@@ -23,14 +22,43 @@ index 4cba368..bf339cf 100755
 -    echo -en $RESET_TEXT
 -    yn=${yn:-Y}  # Default to "Y" if the user presses Enter
 -    case $yn in
--        [Yy]*)  CONNECT_TO_TESTNET=True && break ;;
--        [Nn]*)  CONNECT_TO_TESTNET=False && break ;;
+-        [Yy]*)  CONNECT_TO_TESTNET=true && break ;;
+-        [Nn]*)  CONNECT_TO_TESTNET=false && break ;;
 -        *)  echo ">>> Please answer yes or no." ;;
 -    esac
 -done
+-
+-while true; do
+-    echo -en $GREEN_TEXT
+-    read -p ">> Which swarm would you like to join (Math (A) or Math Hard (B))? [A/b] " ab
+-    echo -en $RESET_TEXT
+-    ab=${ab:-A}  # Default to "A" if the user presses Enter
+-    case $ab in
+-        [Aa]*)  USE_BIG_SWARM=false && break ;;
+-        [Bb]*)  USE_BIG_SWARM=true && break ;;
+-        *)  echo ">>> Please answer A or B." ;;
+-    esac
+-done
+-if [ "$USE_BIG_SWARM" = true ]; then
+-    SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
+-else
+-    SWARM_CONTRACT="$SMALL_SWARM_CONTRACT"
+-fi
+-while true; do
+-    echo -en $GREEN_TEXT
+-    read -p ">> How many parameters (in billions)? [0.5, 1.5, 7, 32, 72] " pc
+-    echo -en $RESET_TEXT
+-    pc=${pc:-0.5}  # Default to "0.5" if the user presses Enter
+-    case $pc in
+-        0.5 | 1.5 | 7 | 32 | 72) PARAM_B=$pc && break ;;
+-        *)  echo ">>> Please answer in [0.5, 1.5, 7, 32, 72]." ;;
+-    esac
+-done
 +CONNECT_TO_TESTNET=True
++USE_BIG_SWARM=True
++PARAM_B=1.5
  
- if [ "$CONNECT_TO_TESTNET" = "True" ]; then
+ if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Run modal_login server.
      echo "Please login to create an Ethereum Server Wallet"
      cd modal-login
@@ -38,7 +66,7 @@ index 4cba368..bf339cf 100755
 -    source ~/.bashrc
 -
 -    # Node.js + NVM setup
--    if ! command -v node >/dev/null 2>&1; then
+-    if ! command -v node > /dev/null 2>&1; then
 -        echo "Node.js not found. Installing NVM and latest Node.js..."
 -        export NVM_DIR="$HOME/.nvm"
 -        if [ ! -d "$NVM_DIR" ]; then
@@ -46,11 +74,11 @@ index 4cba368..bf339cf 100755
 -        fi
 -        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 -        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
--       nvm install node
+-        nvm install node
 -    else
 -        echo "Node.js is already installed: $(node -v)"
 -    fi
--
+ 
 -    if ! command -v yarn > /dev/null 2>&1; then
 -        # Detect Ubuntu (including WSL Ubuntu) and install Yarn accordingly
 -        if grep -qi "ubuntu" /etc/os-release 2> /dev/null || uname -r | grep -qi "microsoft"; then
@@ -65,7 +93,6 @@ index 4cba368..bf339cf 100755
 -            source ~/.bashrc
 -        fi
 -    fi
-+
      yarn install
 -    yarn dev > /dev/null 2>&1 & # Run in background and suppress output
 +    yarn dev -p $1 > /dev/null 2>&1 & # Run in background and suppress output
@@ -73,18 +100,18 @@ index 4cba368..bf339cf 100755
      SERVER_PID=$!  # Store the process ID
      echo "Started server process: $SERVER_PID"
      sleep 5
-     
+ 
 -    # Try to open the URL in the default browser
--    if open http://localhost:3000 2>/dev/null; then
+-    if open http://localhost:3000 2> /dev/null; then
 -        echo_green ">> Successfully opened http://localhost:3000 in your default browser."
 -    else
 -        echo ">> Failed to open http://localhost:3000. Please open it manually."
 -    fi
--    
+-
      cd ..
  
      echo_green ">> Waiting for modal userData.json to be created..."
-@@ -152,7 +101,7 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
+@@ -182,7 +107,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Wait until the API key is activated by the client
      echo "Waiting for API key to become activated..."
      while true; do
@@ -93,30 +120,7 @@ index 4cba368..bf339cf 100755
          if [[ "$STATUS" == "activated" ]]; then
              echo "API key is activated! Proceeding..."
              break
-@@ -163,13 +112,9 @@ if [ "$CONNECT_TO_TESTNET" = "True" ]; then
-     done
- fi
- 
--pip_install() {
--    pip install --disable-pip-version-check -q -r "$1"
--}
--
- echo_green ">> Getting requirements..."
--pip_install "$ROOT"/requirements-hivemind.txt
--pip_install "$ROOT"/requirements.txt
-+pip install --disable-pip-version-check -q -r "$ROOT"/requirements-hivemind.txt
-+pip install --disable-pip-version-check -q -r "$ROOT"/requirements.txt
- 
- if ! command -v nvidia-smi &> /dev/null; then
-     # You don't have a NVIDIA GPU
-@@ -179,26 +124,13 @@ elif [ -n "$CPU_ONLY" ]; then
-     CONFIG_PATH="$ROOT/hivemind_exp/configs/mac/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
- else
-     # NVIDIA GPU found
--    pip_install "$ROOT"/requirements_gpu.txt
-+    pip install --disable-pip-version-check -q -r "$ROOT"/requirements_gpu.txt
-     CONFIG_PATH="$ROOT/hivemind_exp/configs/gpu/grpo-qwen-2.5-0.5b-deepseek-r1.yaml"
- fi
+@@ -229,20 +154,7 @@ fi
  
  echo_green ">> Done!"
  
