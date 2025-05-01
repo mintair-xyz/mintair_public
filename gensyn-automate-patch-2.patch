@@ -1,5 +1,5 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index 0695202..af44c42 100755
+index 0695202..05c2fba 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
 @@ -57,9 +57,6 @@ ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
@@ -12,7 +12,7 @@ index 0695202..af44c42 100755
      # Kill all processes belonging to this script's process group
      kill -- -$$ || true
  
-@@ -80,94 +77,22 @@ cat << "EOF"
+@@ -80,94 +77,29 @@ cat << "EOF"
  
  EOF
  
@@ -39,11 +39,15 @@ index 0695202..af44c42 100755
 -        *)  echo ">>> Please answer A or B." ;;
 -    esac
 -done
--if [ "$USE_BIG_SWARM" = true ]; then
--    SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
--else
--    SWARM_CONTRACT="$SMALL_SWARM_CONTRACT"
--fi
++CONNECT_TO_TESTNET=true
++USE_BIG_SWARM=false
++PARAM_B=1.5
++
+ if [ "$USE_BIG_SWARM" = true ]; then
+     SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
+ else
+     SWARM_CONTRACT="$SMALL_SWARM_CONTRACT"
+ fi
 -while true; do
 -    echo -en $GREEN_TEXT
 -    read -p ">> How many parameters (in billions)? [0.5, 1.5, 7, 32, 72] " pc
@@ -54,9 +58,6 @@ index 0695202..af44c42 100755
 -        *)  echo ">>> Please answer in [0.5, 1.5, 7, 32, 72]." ;;
 -    esac
 -done
-+CONNECT_TO_TESTNET=True
-+USE_BIG_SWARM=True
-+PARAM_B=1.5
  
  if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Run modal_login server.
@@ -64,8 +65,8 @@ index 0695202..af44c42 100755
      cd modal-login
 -    # Check if the yarn command exists; if not, install Yarn.
 -    source ~/.bashrc
--
--    # Node.js + NVM setup
+ 
+     # Node.js + NVM setup
 -    if ! command -v node > /dev/null 2>&1; then
 -        echo "Node.js not found. Installing NVM and latest Node.js..."
 -        export NVM_DIR="$HOME/.nvm"
@@ -78,7 +79,7 @@ index 0695202..af44c42 100755
 -    else
 -        echo "Node.js is already installed: $(node -v)"
 -    fi
- 
+-
 -    if ! command -v yarn > /dev/null 2>&1; then
 -        # Detect Ubuntu (including WSL Ubuntu) and install Yarn accordingly
 -        if grep -qi "ubuntu" /etc/os-release 2> /dev/null || uname -r | grep -qi "microsoft"; then
@@ -111,7 +112,7 @@ index 0695202..af44c42 100755
      cd ..
  
      echo_green ">> Waiting for modal userData.json to be created..."
-@@ -182,7 +107,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
+@@ -182,7 +114,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Wait until the API key is activated by the client
      echo "Waiting for API key to become activated..."
      while true; do
@@ -120,7 +121,7 @@ index 0695202..af44c42 100755
          if [[ "$STATUS" == "activated" ]]; then
              echo "API key is activated! Proceeding..."
              break
-@@ -229,20 +154,7 @@ fi
+@@ -229,20 +161,7 @@ fi
  
  echo_green ">> Done!"
  
