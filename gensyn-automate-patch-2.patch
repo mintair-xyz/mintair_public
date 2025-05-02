@@ -1,5 +1,5 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index 0695202..05c2fba 100755
+index c5e80d7..42f2de6 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
 @@ -57,9 +57,6 @@ ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
@@ -12,7 +12,7 @@ index 0695202..05c2fba 100755
      # Kill all processes belonging to this script's process group
      kill -- -$$ || true
  
-@@ -80,94 +77,29 @@ cat << "EOF"
+@@ -80,44 +77,15 @@ cat << "EOF"
  
  EOF
  
@@ -41,7 +41,7 @@ index 0695202..05c2fba 100755
 -done
 +CONNECT_TO_TESTNET=true
 +USE_BIG_SWARM=false
-+PARAM_B=1.5
++PARAM_B=0.5
 +
  if [ "$USE_BIG_SWARM" = true ]; then
      SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
@@ -61,12 +61,11 @@ index 0695202..05c2fba 100755
  
  if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Run modal_login server.
-     echo "Please login to create an Ethereum Server Wallet"
+@@ -125,47 +93,14 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
      cd modal-login
--    # Check if the yarn command exists; if not, install Yarn.
--    source ~/.bashrc
+     # Check if the yarn command exists; if not, install Yarn.
  
-     # Node.js + NVM setup
+-    # Node.js + NVM setup
 -    if ! command -v node > /dev/null 2>&1; then
 -        echo "Node.js not found. Installing NVM and latest Node.js..."
 -        export NVM_DIR="$HOME/.nvm"
@@ -88,10 +87,9 @@ index 0695202..05c2fba 100755
 -            echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 -            sudo apt update && sudo apt install -y yarn
 -        else
--            echo "Yarn is not installed. Installing Yarn..."
--            curl -o- -L https://yarnpkg.com/install.sh | sh
--            echo 'export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"' >> ~/.bashrc
--            source ~/.bashrc
+-            echo "Yarn not found. Installing Yarn globally with npm (no profile edits)…"
+-            # This lands in $NVM_DIR/versions/node/<ver>/bin which is already on PATH
+-            npm install -g --silent yarn
 -        fi
 -    fi
      yarn install
@@ -102,7 +100,7 @@ index 0695202..05c2fba 100755
      echo "Started server process: $SERVER_PID"
      sleep 5
  
--    # Try to open the URL in the default browser
+     # Try to open the URL in the default browser
 -    if open http://localhost:3000 2> /dev/null; then
 -        echo_green ">> Successfully opened http://localhost:3000 in your default browser."
 -    else
@@ -112,7 +110,7 @@ index 0695202..05c2fba 100755
      cd ..
  
      echo_green ">> Waiting for modal userData.json to be created..."
-@@ -182,7 +114,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
+@@ -180,7 +115,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Wait until the API key is activated by the client
      echo "Waiting for API key to become activated..."
      while true; do
@@ -121,7 +119,7 @@ index 0695202..05c2fba 100755
          if [[ "$STATUS" == "activated" ]]; then
              echo "API key is activated! Proceeding..."
              break
-@@ -229,20 +161,7 @@ fi
+@@ -227,20 +162,7 @@ fi
  
  echo_green ">> Done!"
  
