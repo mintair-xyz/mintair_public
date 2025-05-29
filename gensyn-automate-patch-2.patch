@@ -1,5 +1,5 @@
 diff --git a/run_rl_swarm.sh b/run_rl_swarm.sh
-index c5e80d7..42f2de6 100755
+index 447d65d..c3ff812 100755
 --- a/run_rl_swarm.sh
 +++ b/run_rl_swarm.sh
 @@ -57,9 +57,6 @@ ROOT_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
@@ -12,7 +12,7 @@ index c5e80d7..42f2de6 100755
      # Kill all processes belonging to this script's process group
      kill -- -$$ || true
  
-@@ -80,44 +77,15 @@ cat << "EOF"
+@@ -80,107 +77,35 @@ cat << "EOF"
  
  EOF
  
@@ -41,7 +41,7 @@ index c5e80d7..42f2de6 100755
 -done
 +CONNECT_TO_TESTNET=true
 +USE_BIG_SWARM=false
-+PARAM_B=0.5
++PARAM_B=1.5
 +
  if [ "$USE_BIG_SWARM" = true ]; then
      SWARM_CONTRACT="$BIG_SWARM_CONTRACT"
@@ -59,12 +59,15 @@ index c5e80d7..42f2de6 100755
 -    esac
 -done
  
+-# Create logs directory if it doesn't exist
+ mkdir -p "$ROOT/logs"
+ 
  if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Run modal_login server.
-@@ -125,47 +93,14 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
+     echo "Please login to create an Ethereum Server Wallet"
      cd modal-login
-     # Check if the yarn command exists; if not, install Yarn.
- 
+-    # Check if the yarn command exists; if not, install Yarn.
+-
 -    # Node.js + NVM setup
 -    if ! command -v node > /dev/null 2>&1; then
 -        echo "Node.js not found. Installing NVM and latest Node.js..."
@@ -92,15 +95,29 @@ index c5e80d7..42f2de6 100755
 -            npm install -g --silent yarn
 -        fi
 -    fi
-     yarn install
--    yarn dev > /dev/null 2>&1 & # Run in background and suppress output
-+    yarn dev -p $1 > /dev/null 2>&1 & # Run in background and suppress output
+ 
+     ENV_FILE="$ROOT"/modal-login/.env
+-    if [[ "$OSTYPE" == "darwin"* ]]; then
+-        # macOS version
+-        sed -i '' "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
+-    else
+-        # Linux version
+-        sed -i "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
+-    fi
++
++    sed -i "3s/.*/SMART_CONTRACT_ADDRESS=$SWARM_CONTRACT/" "$ENV_FILE"
+ 
+     yarn install --immutable
+-    echo "Building server"
+     yarn build > "$ROOT/logs/yarn.log" 2>&1
+-    yarn start >> "$ROOT/logs/yarn.log" 2>&1 & # Run in background and log output
++    yarn start -p $1 >> "$ROOT/logs/yarn.log" 2>&1 & # Run in background and log output
  
      SERVER_PID=$!  # Store the process ID
      echo "Started server process: $SERVER_PID"
      sleep 5
  
-     # Try to open the URL in the default browser
+-    # Try to open the URL in the default browser
 -    if open http://localhost:3000 2> /dev/null; then
 -        echo_green ">> Successfully opened http://localhost:3000 in your default browser."
 -    else
@@ -110,7 +127,7 @@ index c5e80d7..42f2de6 100755
      cd ..
  
      echo_green ">> Waiting for modal userData.json to be created..."
-@@ -180,7 +115,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
+@@ -195,7 +120,7 @@ if [ "$CONNECT_TO_TESTNET" = true ]; then
      # Wait until the API key is activated by the client
      echo "Waiting for API key to become activated..."
      while true; do
@@ -119,7 +136,7 @@ index c5e80d7..42f2de6 100755
          if [[ "$STATUS" == "activated" ]]; then
              echo "API key is activated! Proceeding..."
              break
-@@ -227,20 +162,7 @@ fi
+@@ -234,20 +159,7 @@ fi
  
  echo_green ">> Done!"
  
